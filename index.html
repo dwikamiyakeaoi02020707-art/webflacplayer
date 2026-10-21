@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="author" content="Moedev">
+    <meta name="description" content="WebFlacPlayer - Web-based Hi-Res audio player with 10-band EQ, cassette deck mode, and YouTube Music streaming by Moedev.">
+    <meta name="theme-color" content="#111111">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WebFlacPlayer">
+    <title>WebFlacPlayer — Moedev Digital Audio Player</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='115' fill='%230d1117'/%3E%3Ccircle cx='240' cy='240' r='160' fill='%231e293b' stroke='%234fc3f7' stroke-width='12'/%3E%3Cpath d='M260 150v155a45 45 0 1 1-24-39.8V130l135-28v173a45 45 0 1 1-24-39.8V135l-87 18z' fill='%234fc3f7'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='115' fill='%230d1117'/%3E%3Ccircle cx='240' cy='240' r='160' fill='%231e293b' stroke='%234fc3f7' stroke-width='12'/%3E%3Cpath d='M260 150v155a45 45 0 1 1-24-39.8V130l135-28v173a45 45 0 1 1-24-39.8V135l-87 18z' fill='%234fc3f7'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header id="status-bar">
+    <div class="sb-left">
+        <span id="sb-carrier">WebFlacPlayer</span>
+        <span class="sb-alpha-badge">1.0 ALPHA</span>
+    </div>
+    <div class="sb-right">
+        <button type="button" id="pwa-install-top-btn" class="sb-action-chip hidden" title="Install App to Device">
+            + Install App
+        </button>
+        <span class="sb-signal">
+            <span class="bar b1"></span>
+            <span class="bar b2"></span>
+            <span class="bar b3"></span>
+            <span class="bar b4"></span>
+        </span>
+        <span id="sb-quality">HD</span>
+        <span id="sb-time">10:20 AM</span>
+        <span id="sb-battery-pct">100%</span>
+        <span class="sb-battery-icon">
+            <svg width="25" height="12" viewBox="0 0 25 12">
+                <rect x="0.5" y="0.5" width="21" height="11" rx="2" fill="none" stroke="white" stroke-width="1"/>
+                <rect x="22" y="3" width="2.5" height="6" rx="1" fill="white"/>
+                <rect id="battery-fill" x="2" y="2" width="18" height="8" rx="1" fill="white"/>
+            </svg>
+        </span>
+        <button type="button" id="fullscreen-toggle-btn" class="sb-fs-btn" title="Toggle Fullscreen">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+            </svg>
+        </button>
+    </div>
+</header>
+
+<main id="app">
+    <section id="home-view" class="view active">
+        <div class="menu-grid">
+            <button type="button" class="menu-item" data-action="open-songs">
+                <svg class="menu-icon" viewBox="0 0 48 48"><path d="M18 6v24.18A7 7 0 1020 36V14h14v16.18A7 7 0 1036 36V10H20V6z" fill="currentColor"/></svg>
+                <span>All Songs</span>
+            </button>
+            <button type="button" class="menu-item" data-action="open-album">
+                <svg class="menu-icon" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="24" cy="24" r="13" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="24" cy="24" r="8" fill="none" stroke="currentColor" stroke-width="1"/><circle cx="24" cy="24" r="4" fill="currentColor"/></svg>
+                <span>Album</span>
+            </button>
+            <button type="button" class="menu-item" data-action="open-artist">
+                <svg class="menu-icon" viewBox="0 0 48 48"><circle cx="24" cy="15" r="9" fill="currentColor"/><path d="M6 44c0-9.94 8.06-18 18-18s18 8.06 18 18" fill="currentColor"/></svg>
+                <span>Artist</span>
+            </button>
+            <button type="button" class="menu-item" data-action="open-folder">
+                <svg class="menu-icon" viewBox="0 0 48 48"><path d="M4 10a2 2 0 012-2h12l4 4h20a2 2 0 012 2v24a2 2 0 01-2 2H6a2 2 0 01-2-2V10z" fill="currentColor"/></svg>
+                <span>Folder</span>
+            </button>
+            <button type="button" class="menu-item" data-action="open-youtube">
+                <svg class="menu-icon" viewBox="0 0 48 48"><circle cx="12" cy="12" r="4" fill="currentColor"/><circle cx="36" cy="12" r="4" fill="currentColor"/><circle cx="36" cy="36" r="4" fill="currentColor"/><line x1="16" y1="12" x2="32" y2="12" stroke="currentColor" stroke-width="2"/><line x1="36" y1="16" x2="36" y2="32" stroke="currentColor" stroke-width="2"/><line x1="15" y1="15" x2="33" y2="33" stroke="currentColor" stroke-width="2"/></svg>
+                <span>YouTube Stream</span>
+            </button>
+            <button type="button" class="menu-item" data-action="open-favorites">
+                <svg class="menu-icon" viewBox="0 0 48 48"><path d="M24 42s-18-10-18-23a11 11 0 0118-8.5A11 11 0 0142 19c0 13-18 23-18 23z" fill="currentColor"/></svg>
+                <span>Favorites</span>
+            </button>
+            <button type="button" class="menu-item" data-action="open-recent">
+                <svg class="menu-icon" viewBox="0 0 48 48"><rect x="6" y="6" width="14" height="14" rx="2" fill="currentColor"/><path d="M26 8l14 7-14 7z" fill="currentColor"/><rect x="6" y="28" width="36" height="3" rx="1.5" fill="currentColor"/><rect x="6" y="35" width="28" height="3" rx="1.5" fill="currentColor"/><rect x="6" y="42" width="32" height="3" rx="1.5" fill="currentColor"/></svg>
+                <span>Recent</span>
+            </button>
+            <button type="button" class="menu-item" data-action="open-playlists">
+                <svg class="menu-icon" viewBox="0 0 48 48"><rect x="6" y="8" width="24" height="3" rx="1.5" fill="currentColor"/><rect x="6" y="16" width="24" height="3" rx="1.5" fill="currentColor"/><rect x="6" y="24" width="24" height="3" rx="1.5" fill="currentColor"/><path d="M36 16v20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="30" cy="36" r="6" fill="currentColor"/></svg>
+                <span>Playlists</span>
+            </button>
+            <button type="button" class="menu-item" data-action="open-equalizer">
+                <svg class="menu-icon" viewBox="0 0 48 48"><rect x="6" y="22" width="4" height="18" rx="2" fill="currentColor"/><rect x="15" y="10" width="4" height="30" rx="2" fill="currentColor"/><rect x="24" y="16" width="4" height="24" rx="2" fill="currentColor"/><rect x="33" y="6" width="4" height="34" rx="2" fill="currentColor"/><rect x="42" y="14" width="4" height="26" rx="2" fill="currentColor"/></svg>
+                <span>Equalizer</span>
+            </button>
+            <button type="button" class="menu-item" data-action="open-settings">
+                <svg class="menu-icon" viewBox="0 0 48 48"><path d="M24 30a6 6 0 100-12 6 6 0 000 12z" fill="currentColor"/><path d="M41.5 27.2l-2.8-1.6a15 15 0 000-3.2l2.8-1.6a1.5 1.5 0 00.5-2l-3-5.2a1.5 1.5 0 00-2-.5l-2.8 1.6a14 14 0 00-2.8-1.6V10a1.5 1.5 0 00-1.5-1.5h-6A1.5 1.5 0 0022.4 10v3.1a14 14 0 00-2.8 1.6L16.8 13a1.5 1.5 0 00-2 .5l-3 5.2a1.5 1.5 0 00.5 2l2.8 1.6a15 15 0 000 3.2l-2.8 1.6a1.5 1.5 0 00-.5 2l3 5.2a1.5 1.5 0 002 .5l2.8-1.6a14 14 0 002.8 1.6V38a1.5 1.5 0 001.5 1.5h6A1.5 1.5 0 0025.6 38v-3.1a14 14 0 002.8-1.6l2.8 1.6a1.5 1.5 0 002-.5l3-5.2a1.5 1.5 0 00-.5-2z" fill="currentColor"/></svg>
+                <span>Settings</span>
+            </button>
+        </div>
+    </section>
+
+    <section id="songs-view" class="view">
+        <div class="view-header">
+            <button type="button" class="back-btn" data-back>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <h2>All Songs</h2>
+            <button type="button" id="add-files-btn" class="header-action-btn" title="Add Files">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </button>
+        </div>
+        <div id="song-list" class="scrollable-content"></div>
+        <div id="drop-zone">
+            <div class="drop-zone-content">
+                <svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2">
+                    <rect x="8" y="16" width="48" height="36" rx="4"/><path d="M24 8h16v8H24z"/><path d="M32 28v14M25 35l7 7 7-7"/>
+                </svg>
+                <p>Drop local audio files here (Unlimited)</p>
+                <p class="drop-hint">Supports MP3, FLAC, WAV, OGG, AAC, M4A, OPUS + Auto Internet Cover Art</p>
+                <button type="button" id="browse-files-btn" class="accent-btn">Browse Local Files</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="now-playing-view" class="view">
+        <div class="view-header np-header">
+            <button type="button" class="back-btn" data-back>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <h2>Now Playing</h2>
+            <button type="button" id="open-cover-modal-btn" class="header-action-btn" title="Change Cover Art (Auto / Manual)">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            </button>
+            <button type="button" id="cassette-mode-btn" class="header-action-btn" title="Cassette Mode">
+                <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="5" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="12" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="16" cy="12" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="10.5" y1="12" x2="13.5" y2="12" stroke="currentColor" stroke-width="1"/><path d="M6 19h12" stroke="currentColor" stroke-width="1.5"/></svg>
+            </button>
+        </div>
+        <div class="np-content">
+            <div class="np-art-container" id="np-art-trigger" title="Click to change Cover Art">
+                <img id="np-art" src="" alt="Album Art">
+                <div id="np-art-placeholder" class="np-art-placeholder">
+                    <svg viewBox="0 0 80 80" width="80" height="80"><circle cx="40" cy="40" r="28" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/><circle cx="40" cy="40" r="18" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/><circle cx="40" cy="40" r="5" fill="rgba(255,255,255,0.15)"/></svg>
+                </div>
+                <div class="art-edit-overlay">
+                    <span>Change Cover Art</span>
+                </div>
+            </div>
+            <div class="np-info">
+                <div class="np-title-row">
+                    <h1 id="np-title">Glass Horizon</h1>
+                    <button type="button" id="np-fav-btn" class="fav-btn" title="Add to Favorites">
+                        <svg class="star-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg class="star-filled" viewBox="0 0 24 24" fill="currentColor" style="display:none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </button>
+                </div>
+                <p id="np-artist" class="np-artist-text">Moedev</p>
+                <p id="np-album" class="np-album-text">Moedev</p>
+                <div class="np-speed-display">
+                    <span id="np-speed">1.0×</span>
+                </div>
+                <div class="np-progress-section">
+                    <span id="np-current-time" class="time-label">00:00</span>
+                    <div id="np-progress-bar" class="progress-bar">
+                        <div class="progress-track-clip">
+                            <div id="np-progress-fill" class="progress-fill"></div>
+                        </div>
+                        <div id="np-progress-thumb" class="progress-thumb"></div>
+                    </div>
+                    <span id="np-total-time" class="time-label">00:00</span>
+                </div>
+                <div class="np-controls">
+                    <button type="button" id="np-shuffle-btn" class="ctrl-btn" title="Shuffle">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+                    </button>
+                    <button type="button" id="np-prev-btn" class="ctrl-btn ctrl-main" title="Previous">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                    </button>
+                    <button type="button" id="np-play-btn" class="ctrl-btn ctrl-play" title="Play/Pause">
+                        <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    </button>
+                    <button type="button" id="np-next-btn" class="ctrl-btn ctrl-main" title="Next">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                    </button>
+                    <button type="button" id="np-repeat-btn" class="ctrl-btn" title="Repeat">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+                    </button>
+                </div>
+                <p id="np-format-info" class="format-info"></p>
+            </div>
+        </div>
+    </section>
+
+    <section id="cassette-view" class="view">
+        <div class="view-header cassette-view-header">
+            <button type="button" class="back-btn" data-back>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <h2>Cassette Mode</h2>
+            <button type="button" id="digital-mode-btn" class="header-action-btn" title="Digital Mode">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55A4 4 0 1014 17V7h4V3h-6z"/></svg>
+            </button>
+        </div>
+        <div class="cassette-wrapper">
+            <div class="cassette-body">
+                <div class="cassette-label">
+                    <div class="label-row label-row-top">
+                        <span class="label-index">INDEX</span>
+                        <h2 id="cas-title" class="label-title">GLASS HORIZON</h2>
+                    </div>
+                    <div class="label-divider"></div>
+                    <div class="label-row label-row-mid">
+                        <p id="cas-artist" class="label-artist">MOEDEV</p>
+                    </div>
+                    <div class="label-divider"></div>
+                    <div class="label-row label-row-bot">
+                        <p id="cas-album" class="label-album">MOEDEV</p>
+                    </div>
+                </div>
+                <div class="cassette-stripe"></div>
+                <div class="cassette-mechanism">
+                    <div class="cas-side-info">
+                        <span class="side-letter">A</span>
+                        <span class="side-origin">HI-RES</span>
+                    </div>
+                    <div class="cas-tape-section">
+                        <div class="cas-reel" id="cas-reel-left">
+                            <div class="reel-outer" id="cas-tape-left"></div>
+                            <div class="reel-hub"><div class="hub-cross"></div></div>
+                        </div>
+                        <div class="cas-window">
+                            <div class="tape-spool"></div>
+                            <div class="window-line"></div>
+                            <div class="window-line"></div>
+                        </div>
+                        <div class="cas-reel" id="cas-reel-right">
+                            <div class="reel-outer" id="cas-tape-right"></div>
+                            <div class="reel-hub"><div class="hub-cross"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="cassette-controls">
+                <div class="cas-progress-row">
+                    <span id="cas-current-time" class="time-label">00:00</span>
+                    <div id="cas-progress-bar" class="progress-bar">
+                        <div class="progress-track-clip">
+                            <div id="cas-progress-fill" class="progress-fill"></div>
+                        </div>
+                        <div id="cas-progress-thumb" class="progress-thumb"></div>
+                    </div>
+                    <span id="cas-total-time" class="time-label">00:00</span>
+                </div>
+                <div class="cas-btn-row">
+                    <button type="button" id="cas-shuffle-btn" class="ctrl-btn" title="Shuffle">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+                    </button>
+                    <button type="button" id="cas-prev-btn" class="ctrl-btn ctrl-main" title="Previous">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                    </button>
+                    <button type="button" id="cas-play-btn" class="ctrl-btn ctrl-play" title="Play/Pause">
+                        <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    </button>
+                    <button type="button" id="cas-next-btn" class="ctrl-btn ctrl-main" title="Next">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                    </button>
+                    <button type="button" id="cas-repeat-btn" class="ctrl-btn" title="Repeat">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="equalizer-view" class="view">
+        <div class="view-header">
+            <button type="button" class="back-btn" data-back><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+            <h2>Equalizer</h2>
+            <button type="button" id="eq-reset-btn" class="header-action-btn" title="Reset EQ">RST</button>
+        </div>
+        <div class="eq-content scrollable-content">
+            <div class="eq-toggle-row">
+                <span>10-Band Equalizer (Real-Time DSP)</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="eq-toggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="eq-presets" id="eq-presets">
+                <button type="button" class="eq-preset active" data-preset="flat">Flat</button>
+                <button type="button" class="eq-preset" data-preset="rock">Rock</button>
+                <button type="button" class="eq-preset" data-preset="pop">Pop</button>
+                <button type="button" class="eq-preset" data-preset="jazz">Jazz</button>
+                <button type="button" class="eq-preset" data-preset="classical">Classical</button>
+                <button type="button" class="eq-preset" data-preset="bass">Bass Boost</button>
+                <button type="button" class="eq-preset" data-preset="vocal">Vocal</button>
+            </div>
+            <div class="eq-sliders" id="eq-sliders"></div>
+            <p id="eq-status-note" class="yt-hint" style="text-align:center;margin-top:16px;">
+                EQ aktif secara real-time untuk lagu bawaan Moedev, file lokal (FLAC/MP3/WAV) & Direct Audio Stream.
+            </p>
+        </div>
+    </section>
+
+    <section id="youtube-view" class="view">
+        <div class="view-header">
+            <button type="button" class="back-btn" data-back><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+            <h2>YouTube Music Stream</h2>
+            <button type="button" id="open-unlock-modal-btn" class="header-action-btn pro-header-btn" title="Unlock Unlimited / Redeem Code">
+                PRO / CODE
+            </button>
+        </div>
+        <div class="yt-content scrollable-content">
+            <div class="network-quota-card">
+                <div class="quota-top">
+                    <span id="quota-title">Alpha Trial Network Quota</span>
+                    <span id="quota-badge" class="quota-badge">0 / 15 Tracks</span>
+                </div>
+                <div class="quota-bar-bg">
+                    <div id="quota-bar-fill" class="quota-bar-fill" style="width: 0%;"></div>
+                </div>
+                <div class="quota-bottom">
+                    <span id="quota-desc">Free trial allows 15 network songs. Donate or enter a Demo Code to unlock unlimited!</span>
+                    <button type="button" id="unlock-pro-inline-btn" class="text-link-btn">Redeem / License Options</button>
+                </div>
+            </div>
+
+            <div class="yt-input-group">
+                <input type="url" id="yt-url-input" placeholder="Paste YouTube or YouTube Music link..." autocomplete="off" spellcheck="false">
+                <button type="button" id="yt-load-btn" class="accent-btn" style="margin-top:0;">Add & Play</button>
+            </div>
+            <p class="yt-hint">Supports <strong>youtube.com/watch?v=...</strong>, <strong>youtu.be/...</strong>, and <strong>music.youtube.com/watch?v=...</strong></p>
+
+            <div id="yt-history" class="yt-history">
+                <h3>Saved YouTube Tracks</h3>
+                <div id="yt-history-list"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="favorites-view" class="view">
+        <div class="view-header">
+            <button type="button" class="back-btn" data-back><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+            <h2>Favorites</h2>
+        </div>
+        <div id="favorites-list" class="scrollable-content"></div>
+    </section>
+
+    <section id="playlists-view" class="view">
+        <div class="view-header">
+            <button type="button" class="back-btn" data-back><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+            <h2>Playlists</h2>
+            <button type="button" id="create-playlist-btn" class="header-action-btn" title="New Playlist">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </button>
+        </div>
+        <div id="playlists-container" class="scrollable-content"></div>
+    </section>
+
+    <section id="recent-view" class="view">
+        <div class="view-header">
+            <button type="button" class="back-btn" data-back><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+            <h2>Recently Played</h2>
+        </div>
+        <div id="recent-list" class="scrollable-content"></div>
+    </section>
+
+    <section id="album-view" class="view">
+        <div class="view-header">
+            <button type="button" class="back-btn" data-back><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+            <h2>Albums</h2>
+        </div>
+        <div id="album-list" class="scrollable-content album-grid"></div>
+    </section>
+
+    <section id="artist-view" class="view">
+        <div class="view-header">
+            <button type="button" class="back-btn" data-back><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+            <h2>Artists</h2>
+        </div>
+        <div id="artist-list" class="scrollable-content"></div>
+    </section>
+
+    <section id="settings-view" class="view">
+        <div class="view-header">
+            <button type="button" class="back-btn" data-back><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+            <h2>Settings & System Info</h2>
+        </div>
+        <div class="settings-content scrollable-content">
+            <div class="setting-group">
+                <h3>App Installation & Fullscreen (PWA)</h3>
+                <div class="setting-item">
+                    <label>Fullscreen Mode</label>
+                    <button type="button" id="setting-fullscreen-btn" class="accent-btn btn-sm">Toggle Fullscreen</button>
+                </div>
+                <div class="setting-item">
+                    <label>Install App / Shortcut (Chrome & Edge)</label>
+                    <button type="button" id="setting-install-pwa-btn" class="accent-btn btn-sm">Install WebFlacPlayer</button>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>Playback & Cover Art</h3>
+                <div class="setting-item">
+                    <label for="setting-speed">Playback Speed</label>
+                    <select id="setting-speed">
+                        <option value="0.5">0.5×</option>
+                        <option value="0.75">0.75×</option>
+                        <option value="1" selected>1.0×</option>
+                        <option value="1.25">1.25×</option>
+                        <option value="1.5">1.5×</option>
+                        <option value="2">2.0×</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="setting-volume">Master Volume</label>
+                    <input type="range" id="setting-volume" min="0" max="100" value="100">
+                    <span id="volume-val">100%</span>
+                </div>
+                <div class="setting-item">
+                    <label>Auto-Fetch Missing Cover Art from Internet</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="setting-auto-cover" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>Display & Theme Engine</h3>
+                <div class="setting-item">
+                    <label for="setting-theme">Background Theme</label>
+                    <select id="setting-theme">
+                        <option value="dark" selected>Dark Slate (Default)</option>
+                        <option value="miku">Hatsune Miku (Cyan Teal)</option>
+                        <option value="teto">Kasane Teto (Crimson Rose)</option>
+                        <option value="midnight">Midnight Blue</option>
+                        <option value="amoled">AMOLED Pitch Black</option>
+                        <option value="forest">Forest Emerald</option>
+                        <option value="crimson">Crimson Wine</option>
+                        <option value="purple">Royal Purple</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="setting-accent-color">Custom Accent Color</label>
+                    <div class="color-picker-wrap">
+                        <input type="color" id="setting-accent-color" value="#4fc3f7" title="Choose any color">
+                        <span id="accent-hex-label">#4FC3F7</span>
+                    </div>
+                </div>
+                <div class="setting-item color-swatches-row">
+                    <label>Quick Color Presets</label>
+                    <div class="color-swatches" id="color-swatches">
+                        <button type="button" class="color-swatch" data-color="#39c5bb" style="background:#39c5bb;" title="Hatsune Miku Cyan"></button>
+                        <button type="button" class="color-swatch" data-color="#e12885" style="background:#e12885;" title="Kasane Teto Crimson"></button>
+                        <button type="button" class="color-swatch" data-color="#4fc3f7" style="background:#4fc3f7;" title="Sky Blue"></button>
+                        <button type="button" class="color-swatch" data-color="#10b981" style="background:#10b981;" title="Emerald"></button>
+                        <button type="button" class="color-swatch" data-color="#f43f5e" style="background:#f43f5e;" title="Rose Red"></button>
+                        <button type="button" class="color-swatch" data-color="#f59e0b" style="background:#f59e0b;" title="Amber Gold"></button>
+                        <button type="button" class="color-swatch" data-color="#a855f7" style="background:#a855f7;" title="Neon Purple"></button>
+                        <button type="button" class="color-swatch" data-color="#84cc16" style="background:#84cc16;" title="Lime"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group" id="setting-license-group">
+                <h3>Network License, Refund & Quota (Demo)</h3>
+                <div class="setting-item">
+                    <label>License Status</label>
+                    <span id="setting-license-status" class="status-pill">ALPHA TRIAL (15 Limit)</span>
+                </div>
+                <div class="setting-item" id="setting-refund-timer-row" style="display:none;">
+                    <label>4-Day Refund Window (Demo)</label>
+                    <span id="setting-refund-window" class="dim" style="font-size:12px;">4 days remaining</span>
+                </div>
+                <div class="setting-item">
+                    <label>License Actions</label>
+                    <div class="license-action-group">
+                        <button type="button" id="setting-open-modal-btn" class="accent-btn btn-sm">Redeem / Donate</button>
+                        <button type="button" id="setting-refund-btn" class="danger-outline-btn hidden">Refund (4-Day Limit)</button>
+                        <button type="button" id="setting-reset-purchase-btn" class="subtle-outline-btn hidden">Reset Purchase</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group" id="setting-device-group">
+                <h3>Device & Audio Hardware Info</h3>
+                <div class="device-info-grid" id="device-info-grid">
+                    <div class="dev-card">
+                        <span class="dev-label">OS / Platform</span>
+                        <span class="dev-val" id="dev-os">Detecting...</span>
+                    </div>
+                    <div class="dev-card">
+                        <span class="dev-label">Browser Engine</span>
+                        <span class="dev-val" id="dev-browser">Detecting...</span>
+                    </div>
+                    <div class="dev-card">
+                        <span class="dev-label">CPU Threads</span>
+                        <span class="dev-val" id="dev-cpu">-- Cores</span>
+                    </div>
+                    <div class="dev-card">
+                        <span class="dev-label">Device Memory (RAM)</span>
+                        <span class="dev-val" id="dev-ram">-- GB</span>
+                    </div>
+                    <div class="dev-card">
+                        <span class="dev-label">Display Resolution</span>
+                        <span class="dev-val" id="dev-screen">-- × --</span>
+                    </div>
+                    <div class="dev-card">
+                        <span class="dev-label">Audio Sample Rate</span>
+                        <span class="dev-val" id="dev-audio-hz">48000 Hz (24-bit DSP)</span>
+                    </div>
+                    <div class="dev-card">
+                        <span class="dev-label">Battery Status</span>
+                        <span class="dev-val" id="dev-battery">100%</span>
+                    </div>
+                    <div class="dev-card">
+                        <span class="dev-label">Network Status</span>
+                        <span class="dev-val" id="dev-net">Online</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group" id="setting-creator-group">
+                <h3>Developer & App Info</h3>
+                <div class="creator-card">
+                    <div class="creator-header">
+                        <div class="creator-avatar">MD</div>
+                        <div class="creator-meta">
+                            <h4>WebFlacPlayer <span class="version-tag">v1.0.0-alpha.tester</span></h4>
+                            <p>Developed & Powered by <strong>Moedev</strong></p>
+                        </div>
+                    </div>
+                    <div class="creator-body">
+                        <p>A retro-modern Hi-Res Digital Audio Player engineered for the web. Combines lossless local playback with YouTube Music network streaming.</p>
+                        <div class="creator-badges">
+                            <span>FLAC / Hi-Res Ready</span>
+                            <span>YouTube Music Stream</span>
+                            <span>PWA Standalone App</span>
+                            <span>10-Band WebAudio EQ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Cover Art Manager Modal -->
+<div id="cover-art-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Cover Art Manager (Auto & Manual)</h3>
+            <button type="button" id="close-cover-modal" class="header-action-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="donate-box">
+                <h4>Search Cover Art from Internet</h4>
+                <div class="yt-input-group">
+                    <input type="text" id="cover-search-input" placeholder="Search artist or song title..." autocomplete="off">
+                    <button type="button" id="cover-search-btn" class="accent-btn" style="margin-top:0;">Search</button>
+                </div>
+                <div id="cover-search-results" class="cover-results-grid"></div>
+            </div>
+
+            <div class="demo-code-box">
+                <h4>Manual Cover Art URL</h4>
+                <div class="yt-input-group">
+                    <input type="url" id="cover-url-input" placeholder="Paste direct image link (https://...jpg/png)" autocomplete="off">
+                    <button type="button" id="cover-url-apply-btn" class="accent-btn" style="margin-top:0;">Apply</button>
+                </div>
+            </div>
+
+            <div class="demo-code-box">
+                <h4>Upload Image from Device</h4>
+                <button type="button" id="cover-upload-btn" class="autofill-btn">Browse Image File (JPG / PNG / WEBP)</button>
+                <input type="file" id="cover-file-input" accept="image/*" hidden>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- License & Demo Code Modal -->
+<div id="unlock-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Network License & Demo Code</h3>
+            <button type="button" id="close-unlock-modal" class="header-action-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p class="modal-lead">
+                In <strong>v1.0.0-alpha.tester</strong>, YouTube network streaming is limited to <strong>15 tracks</strong>. Local audio files (MP3/FLAC/WAV) and built-in Moedev demo tracks are always 100% free and unlimited.
+            </p>
+            <div class="donate-box">
+                <h4>Support Moedev (Donation Demo)</h4>
+                <p>Support development costs to unlock unlimited network tracks, or use a free Alpha Tester code below. Includes a <strong>4-Day Refund Guarantee (Demo)</strong>.</p>
+                <div class="donate-actions">
+                    <button type="button" id="simulate-donate-btn" class="accent-btn" style="margin-top:8px;">Support / Donate Now (Demo)</button>
+                </div>
+            </div>
+            <div class="demo-code-box">
+                <h4>Have an Alpha Tester / Demo Code?</h4>
+                <div class="yt-input-group">
+                    <input type="text" id="demo-code-input" placeholder="Enter code (e.g. MOEDEV or VIBECODE)" autocomplete="off">
+                    <button type="button" id="redeem-code-btn" class="accent-btn" style="margin-top:0;">Activate</button>
+                </div>
+                <p class="demo-code-hint">
+                    Alpha Tester build: click below to auto-fill a complimentary demo key.
+                </p>
+                <button type="button" id="autofill-demo-btn" class="autofill-btn">Auto-Fill Demo Code (MOEDEV)</button>
+            </div>
+
+            <div id="modal-refund-box" class="donate-box refund-panel hidden">
+                <h4>Manage Active PRO License (Demo)</h4>
+                <p id="modal-refund-status-text">Refund policy: Eligible within 4 days of activation (Demo simulation).</p>
+                <div class="license-action-group" style="margin-top:10px;">
+                    <button type="button" id="modal-refund-btn" class="danger-outline-btn">Request Refund (4-Day Policy)</button>
+                    <button type="button" id="modal-reset-purchase-btn" class="subtle-outline-btn">Reset Purchase</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="mini-player" class="hidden">
+    <div id="mini-progress-bar" class="mini-progress-bar">
+        <div id="mini-progress-fill" class="mini-progress-fill"></div>
+    </div>
+    <div class="mini-content" id="mini-player-tap">
+        <img id="mini-art" src="" alt="" class="mini-art">
+        <div id="mini-art-placeholder" class="mini-art-placeholder">
+            <svg viewBox="0 0 32 32" width="32" height="32"><circle cx="16" cy="16" r="12" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/><circle cx="16" cy="16" r="3" fill="rgba(255,255,255,0.3)"/></svg>
+        </div>
+        <div class="mini-info">
+            <p id="mini-title" class="mini-title">Glass Horizon</p>
+            <p id="mini-artist" class="mini-artist">Moedev</p>
+        </div>
+        <div class="mini-controls">
+            <button type="button" id="mini-prev-btn" class="mini-ctrl">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+            </button>
+            <button type="button" id="mini-play-btn" class="mini-ctrl mini-play-ctrl">
+                <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <button type="button" id="mini-next-btn" class="mini-ctrl">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="file-input" multiple accept="audio/*,.flac,.mp3,.wav,.ogg,.aac,.m4a,.wma,.opus,.ape,.alac" hidden>
+<audio id="audio-element" preload="auto"></audio>
+
+<div id="yt-hidden-streamer" class="bg-stream-host">
+    <div id="yt-player"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.7/jsmediatags.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "WebFlacPlayer — Moedev Audio Player",
+  "short_name": "WebFlacPlayer",
+  "description": "Retro-modern Hi-Res Digital Audio Player with 10-Band EQ, Cassette Mode, and YouTube Music Streaming by Moedev.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0a0a",
+  "theme_color": "#111111",
+  "categories": ["music", "entertainment", "multimedia"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='115' fill='%230d1117'/%3E%3Ccircle cx='240' cy='240' r='160' fill='%231e293b' stroke='%234fc3f7' stroke-width='12'/%3E%3Cellipse cx='240' cy='240' rx='85' ry='160' fill='none' stroke='%2338bdf8' stroke-width='8' opacity='0.6'/%3E%3Cline x1='80' y1='240' x2='400' y2='240' stroke='%2338bdf8' stroke-width='8' opacity='0.6'/%3E%3Cline x1='105' y1='160' x2='375' y2='160' stroke='%2338bdf8' stroke-width='6' opacity='0.4'/%3E%3Cline x1='105' y1='320' x2='375' y2='320' stroke='%2338bdf8' stroke-width='6' opacity='0.4'/%3E%3Cpath d='M260 150v155a45 45 0 1 1-24-39.8V130l135-28v173a45 45 0 1 1-24-39.8V135l-87 18z' fill='%234fc3f7' stroke='%23ffffff' stroke-width='8' stroke-linejoin='round'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='115' fill='%230d1117'/%3E%3Ccircle cx='240' cy='240' r='160' fill='%231e293b' stroke='%234fc3f7' stroke-width='12'/%3E%3Cellipse cx='240' cy='240' rx='85' ry='160' fill='none' stroke='%2338bdf8' stroke-width='8' opacity='0.6'/%3E%3Cline x1='80' y1='240' x2='400' y2='240' stroke='%2338bdf8' stroke-width='8' opacity='0.6'/%3E%3Cline x1='105' y1='160' x2='375' y2='160' stroke='%2338bdf8' stroke-width='6' opacity='0.4'/%3E%3Cline x1='105' y1='320' x2='375' y2='320' stroke='%2338bdf8' stroke-width='6' opacity='0.4'/%3E%3Cpath d='M260 150v155a45 45 0 1 1-24-39.8V130l135-28v173a45 45 0 1 1-24-39.8V135l-87 18z' fill='%234fc3f7' stroke='%23ffffff' stroke-width='8' stroke-linejoin='round'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
